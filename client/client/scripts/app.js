@@ -3,9 +3,9 @@ var app = {
 
   //TODO: The current 'toggleFriend' function just toggles the class 'friend'
   //to all messages sent by the user
-  server: 'https://api.parse.com/1/classes/messages/',
+  server: 'http://127.0.0.1:3000/classes/messages/',
   username: 'anonymous',
-  roomname: 'lobby',
+  roomname: 'main',
   lastMessageId: 0,
   friends: {},
 
@@ -13,23 +13,36 @@ var app = {
     // Get username
     app.username = window.location.search.substr(10);
 
-    // Cache jQuery selectors
-    app.$message = $('#message');
-    app.$chats = $('#chats');
-    app.$roomSelect = $('#roomSelect');
-    app.$send = $('#send');
+    // POST for app.username to classes/username
+    $.ajax({
+      url: 'http://127.0.0.1:3000/classes/users/',
+      type: 'POST',
+      data: JSON.stringify({username: app.username}),
+      contentType: 'application/json',
+      success: function () {
+        // Trigger a fetch to update the messages, pass true to animate
+        // Cache jQuery selectors
+        app.$message = $('#message');
+        app.$chats = $('#chats');
+        app.$roomSelect = $('#roomSelect');
+        app.$send = $('#send');
 
-    // Add listeners
-    app.$chats.on('click', '.username', app.toggleFriend);
-    app.$send.on('submit', app.handleSubmit);
-    app.$roomSelect.on('change', app.saveRoom);
+        // Add listeners
+        app.$chats.on('click', '.username', app.toggleFriend);
+        app.$send.on('submit', app.handleSubmit);
+        app.$roomSelect.on('change', app.saveRoom);
 
-    // Fetch previous messages
-    app.startSpinner();
-    app.fetch(false);
+        // Fetch previous messages
+        app.startSpinner();
+        app.fetch(false);
 
-    // Poll for new messages
-    setInterval(app.fetch, 3000);
+        // Poll for new messages
+        setInterval(app.fetch, 3000);
+      },
+      error: function (data) {
+        console.error('chatterbox: Failed to save username', data);
+      }
+    });
   },
 
   send: function(data) {
@@ -48,6 +61,7 @@ var app = {
         app.fetch();
       },
       error: function (data) {
+        console.log('data', data);
         console.error('chatterbox: Failed to send message', data);
       }
     });
@@ -58,17 +72,17 @@ var app = {
       url: app.server,
       type: 'GET',
       contentType: 'application/json',
-      data: { order: '-createdAt'},
       success: function(data) {
         // Don't bother if we have nothing to work with
+        console.log('fetch', data);
         if (!data.results || !data.results.length) { return; }
-
+        data.results.sort(function(a, b) { return b.id - a.id; });
         // Get the last message
-        var mostRecentMessage = data.results[data.results.length - 1];
+        var mostRecentMessage = data.results[0];
         var displayedRoom = $('.chat span').first().data('roomname');
         app.stopSpinner();
         // Only bother updating the DOM if we have a new message
-        if (mostRecentMessage.objectId !== app.lastMessageId || app.roomname !== displayedRoom) {
+        if (mostRecentMessage.id !== app.lastMessageId || app.roomname !== displayedRoom) {
           // Update the UI with the fetched rooms
           app.populateRooms(data.results);
 
@@ -76,10 +90,11 @@ var app = {
           app.populateMessages(data.results, animate);
 
           // Store the ID of the most recent message
-          app.lastMessageId = mostRecentMessage.objectId;
+          app.lastMessageId = mostRecentMessage.id;
         }
       },
       error: function(data) {
+        console.log('data', data);
         console.error('chatterbox: Failed to fetch messages');
       }
     });
@@ -160,7 +175,7 @@ var app = {
       }
 
       var $message = $('<br><span/>');
-      $message.text(data.text).appendTo($chat);
+      $message.text(data.message).appendTo($chat);
 
       // Add the message to the UI
       app.$chats.append($chat);
@@ -213,7 +228,7 @@ var app = {
   handleSubmit: function(evt) {
     var message = {
       username: app.username,
-      text: app.$message.val(),
+      message: app.$message.val(),
       roomname: app.roomname || 'lobby'
     };
 
