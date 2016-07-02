@@ -26,6 +26,8 @@ CREATE TABLE messages (
   FOREIGN KEY(room) REFERENCES rooms(id)
 );
 
+INSERT rooms VALUE(0, 'main');
+
 
 /* Create other tables and define schemas for them here! */
 
