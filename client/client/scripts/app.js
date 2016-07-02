@@ -61,7 +61,6 @@ var app = {
         app.fetch();
       },
       error: function (data) {
-        console.log('data', data);
         console.error('chatterbox: Failed to send message', data);
       }
     });
@@ -74,7 +73,6 @@ var app = {
       contentType: 'application/json',
       success: function(data) {
         // Don't bother if we have nothing to work with
-        console.log('fetch', data);
         if (!data.results || !data.results.length) { return; }
         data.results.sort(function(a, b) { return b.id - a.id; });
         // Get the last message
