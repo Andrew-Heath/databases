@@ -1,11 +1,21 @@
-var db = require('../db').dbConnection;
+var db = require('../db').db;
+var Sequelize = require('sequelize');
 
 module.exports = {
   messages: {
     // a function which produces all the messages
     get: function (res) {
-      var queryString = 'SELECT m.id, m.message, u.username, r.roomname FROM messages m INNER JOIN users u ON (m.user=u.id) INNER JOIN rooms r on (m.room=r.id)';
-      queryHelper(queryString, res);
+      Messages.findAll()
+      .then(function(data) {
+        console.log('data in messages/get', data);
+        res.send(data);
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
+
+      // var queryString = 'SELECT m.id, m.message, u.username, r.roomname FROM messages m INNER JOIN users u ON (m.user=u.id) INNER JOIN rooms r on (m.room=r.id)';
+      // queryHelper(queryString, res);
     },
     // a function which can be used to insert a message into the database
     post: function (data, res) {
@@ -26,8 +36,6 @@ module.exports = {
             queryHelper(queryString, res);
           });
         } else {
-          console.log('in message');
-          console.log('message', data);
           queryString = 'INSERT messages VALUE(0, "' + 
             data.message + 
             '", (SELECT id FROM users WHERE username="' + 

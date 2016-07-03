@@ -1,11 +1,16 @@
-var models = require('../models');
+var Users = require('../db').Users;
+var Messages = require('../db').Messages;
+var Sequelize = require('sequelize');
 
 module.exports = {
   messages: {
     // a function which handles a get request for all messages
     get: function (req, res) {
       res.header(defaultCorsHeaders);
-      models.messages.get(res);
+      Messages.findAll({include: [Users]})
+        .then(function(messages) {
+          res.json(messages);
+        });
     },
     // a function which handles posting a message to the database
     post: function (req, res) {
@@ -23,7 +28,10 @@ module.exports = {
     // Ditto as above
     get: function (req, res) {
       res.header(defaultCorsHeaders);
-      models.users.get(res);
+      User.findAll()
+        .then(function(users) {
+          res.json(users);
+        });
     },
     post: function (req, res) {
       res.header(defaultCorsHeaders);
