@@ -13,6 +13,25 @@ var app = {
     // Get username
     app.username = window.location.search.substr(10);
 
+    // Trigger a fetch to update the messages, pass true to animate
+    // Cache jQuery selectors
+    app.$message = $('#message');
+    app.$chats = $('#chats');
+    app.$roomSelect = $('#roomSelect');
+    app.$send = $('#send');
+
+    // Add listeners
+    app.$chats.on('click', '.username', app.toggleFriend);
+    app.$send.on('submit', app.handleSubmit);
+    app.$roomSelect.on('change', app.saveRoom);
+
+    // Fetch previous messages
+    app.startSpinner();
+    app.fetch(false);
+
+    // Poll for new messages
+    setInterval(app.fetch, 3000);
+
     // POST for app.username to classes/username
     $.ajax({
       url: 'http://127.0.0.1:3000/classes/users/',
@@ -20,24 +39,6 @@ var app = {
       data: JSON.stringify({username: app.username}),
       contentType: 'application/json',
       success: function () {
-        // Trigger a fetch to update the messages, pass true to animate
-        // Cache jQuery selectors
-        app.$message = $('#message');
-        app.$chats = $('#chats');
-        app.$roomSelect = $('#roomSelect');
-        app.$send = $('#send');
-
-        // Add listeners
-        app.$chats.on('click', '.username', app.toggleFriend);
-        app.$send.on('submit', app.handleSubmit);
-        app.$roomSelect.on('change', app.saveRoom);
-
-        // Fetch previous messages
-        app.startSpinner();
-        app.fetch(false);
-
-        // Poll for new messages
-        setInterval(app.fetch, 3000);
       },
       error: function (data) {
         console.error('chatterbox: Failed to save username', data);

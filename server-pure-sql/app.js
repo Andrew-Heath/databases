@@ -1,5 +1,5 @@
 var express = require('express');
-var Sequelize = require('sequelize');
+var db = require('./db').dbConnection;
 
 // Middleware
 var morgan = require('morgan');

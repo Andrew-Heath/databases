@@ -1,6 +1,5 @@
 var Sequelize = require('sequelize');
-
-var db = new Sequelize('chat', 'root', 'laa');
+var db = new Sequelize('chat', 'root', '');
 
 var Users = db.define('users', {
   username: Sequelize.STRING
@@ -18,5 +17,5 @@ Messages.belongsTo(Users);
 Users.sync();
 Messages.sync();
 
-exports.User = User;
-exports.Message = Message;
+exports.Users = Users;
+exports.Messages = Messages;

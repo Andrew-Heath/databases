@@ -1,30 +1,16 @@
-var Users = require('../db').Users;
-var Messages = require('../db').Messages;
-var Sequelize = require('sequelize');
+var models = require('../models');
 
 module.exports = {
   messages: {
     // a function which handles a get request for all messages
     get: function (req, res) {
       res.header(defaultCorsHeaders);
-      Messages.findAll({include: [Users]})
-        .then(function(messages) {
-          res.json(messages);
-        });
+      models.messages.get(res);
     },
     // a function which handles posting a message to the database
     post: function (req, res) {
       res.header(defaultCorsHeaders);
-      User.findOrCreate({where: {username: req.body.username}})
-        .spread(function(user, created) {
-          Message.create({
-            username: user.get('id'),
-            message: req.body.message,
-            roomname: req.body.roomname
-          }).then(function(message) {
-            res.sendStatus(201);
-          });
-        });
+      models.messages.post(req.body, res);
     },
 
     options: function(req, res) {
@@ -37,17 +23,11 @@ module.exports = {
     // Ditto as above
     get: function (req, res) {
       res.header(defaultCorsHeaders);
-      User.findAll()
-        .then(function(users) {
-          res.json(users);
-        });
+      models.users.get(res);
     },
     post: function (req, res) {
       res.header(defaultCorsHeaders);
-      Users.findOrCreate({where: {username: req.body.username}})
-      .spread(function(user, created) {
-        res.sendStatus(created ? 201 : 200);
-      });
+      models.users.post(req.body, res);
     },
 
     options: function(req, res) {
